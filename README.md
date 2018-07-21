@@ -1,4 +1,4 @@
-# PythonProject
+# GoogleTrends
 
 Google Trends Keywords:
 The whole premise of this project is to see if one can predict stock prices using google trends.
