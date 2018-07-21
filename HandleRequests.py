@@ -6,7 +6,7 @@ Created on Jul 17, 2018
 
 import socketserver
 from CommunicateWithDatabase import HandleDatabase
-from DividendYahoo import DiviScrape
+from DataYahoo import DiviScrape
 from GoogleTrendsScrape import GoogleTrends
 
 class MyTCPHandler(socketserver.StreamRequestHandler):
