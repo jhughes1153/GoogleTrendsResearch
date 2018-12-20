@@ -10,6 +10,7 @@ information pertaining to the spy
 from sqlalchemy import create_engine
 import pandas as pd
 
+
 class HandleDB:
     """class that will open a connection into the database, as it will be the same repetative tasks over and over the
     class it self will hold the actual queries
@@ -18,15 +19,6 @@ class HandleDB:
     def __init__(self):
         print('Opening connection to the server')
         self.cnxn = create_engine("mysql+pymysql://root:#1Runner!!@localhost:3306/SpyInformation")
-        
-    def check_if_tables_exist(self):
-        """just a true or false that the tables exist basically"""
-        query_tables_exists = "SELECT table_name FROM information_schema.tables where table_schema='SpyInformation';"
-        tables = self.cnxn.execute(query_tables_exists).fetchall()
-        if(len(tables)>0):
-            return True
-        else:
-            return False
         
     def get_most_recent_dates(self):
         """gets the most recent date to use for getting where to split the values in yahoo
@@ -41,18 +33,25 @@ class HandleDB:
         return keyword_date, pricing_date, divis_date
     
     def create_tables(self, df, table_name):
-        """a method that will simply add the dataframe to the database assuming"""
+        """a method that will simply add the dataframe to the database assuming
+        :param df: dataframe
+        :param table_name: string for table name
+        """
         df.to_sql(table_name, self.cnxn)
         
     def append_to_database(self, df, table_name):
-        """a method that appends data to the database"""
-        df.to_sql(table_name, self.cnxn, if_exists="append")
+        """a method that appends data to the database
+        :param df: dataframe
+        :param table_name: string for table name
+        """
+        df.to_sql(table_name, self.cnxn, if_exists="append", index=False)
         
     def return_table(self, table_name):
-        """returns the table as a pandas dataframe"""
+        """returns the table as a pandas dataframe
+        :param table_name: string for the table
+        """
         return pd.read_sql("SELECT * FROM {}".format(table_name), self.cnxn)
 
-
-#a = HandleDB()
-#b = a.get_most_recent_date()
-#print(b)     
+# a = HandleDB()
+# b = a.get_most_recent_date()
+# print(b)     
