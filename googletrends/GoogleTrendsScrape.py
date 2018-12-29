@@ -6,7 +6,6 @@ when this runs automatically every week that only the new values get entered
 
 @author: jack
 '''
-
 from bs4 import BeautifulSoup
 import pandas as pd
 import numpy as np
@@ -84,9 +83,9 @@ class GoogleTrends:
         #a new browser window
         options = Options()
         options.set_headless(headless=True)
-        driver = webdriver.Firefox(executable_path=r'C:\Users\Jack\Downloads\geckodriver-v0.20.1-win64\geckodriver.exe', options = options)
-        #driver = webdriver.Firefox(firefox_options = options, executable_path=r'C:\Users\Jack\Downloads\geckodriver-v0.21.0-win64\geckodriver.exe')
-        
+        #I realize this is lazy but it will change it once I remever the proper way to do it
+        driver = webdriver.Firefox(executable_path='/home/jack/Downloads/geckodriver-v0.23.0-linux64/geckodriver')
+
         #if only passed 1 value then make make it a list still
         if isinstance(keywords, str): keywords = [keywords]
         #iterate over keywords
@@ -209,24 +208,22 @@ class GoogleTrends:
         #close the opened file
             
 
-#===============================================================================
-# if __name__ == '__main__':
-#     #use this in order to get it to ask the person for the words and the stock
-#     #===========================================================================
-#     # stock = input('Please enter a stock ticker:\n')
-#     # 
-#     # keys = input('Please enter the keywords that you would like to use and please use commas to separate words:\n')
-#     # keys = keys.split(',')
-#     # for i in range(len(keys)):
-#     #     if(' ' in keys[i]):
-#     #         keys[i] = keys[i][1:]
-#     #===========================================================================
-#     
-#     googleTrendsScrape = GoogleTrends('aapl')
-#     
-#     keywords_for_ford = ['Dividend']
-#     googleTrendsScrape.scrape_data(keywords_for_ford)
-#     googleTrendsScrape.print_head()
-#     googleTrendsScrape.keywords_to_csv()
-#===============================================================================
+if __name__ == '__main__':
+    #use this in order to get it to ask the person for the words and the stock
+    #===========================================================================
+    # stock = input('Please enter a stock ticker:\n')
+    # 
+    # keys = input('Please enter the keywords that you would like to use and please use commas to separate words:\n')
+    # keys = keys.split(',')
+    # for i in range(len(keys)):
+    #     if(' ' in keys[i]):
+    #         keys[i] = keys[i][1:]
+    #===========================================================================
+     
+    googleTrendsScrape = GoogleTrends('aapl', ['Dividend'])
+     
+    #keywords_for_ford = ['Dividend']
+    #googleTrendsScrape.scrape_data()
+    googleTrendsScrape.print_head()
+    googleTrendsScrape.keywords_to_csv()
 

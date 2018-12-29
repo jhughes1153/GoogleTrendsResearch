@@ -13,15 +13,12 @@ import sys
 def main():
     now = dt.datetime.now()
     
-    with open('/home/jack/timecheck.txt', 'w') as cron_checker:
+    with open('/home/jack/timecheck.txt', 'a') as cron_checker:
         cron_checker.write('Good evening the time is {} the crontab worked!!!'.format(now))
     
-    now = now + dt.timedelta(days=7)
-    now = now.replace(minute=0, second=0, microsecond=0)
-    
-    a = """sudo rtcwake -m off -l -t "$(date -d '{}' '+%s')" """.format(now)
-    
-    print(a)
+    now = now + dt.timedelta(days=1)
+    now = now.replace(hour=6, minute=0, second=0, microsecond=0)
+
     os.system("""sudo rtcwake -m no -l -t "$(date -d '{}' '+%s')" """.format(now))
     
     time.sleep(5)

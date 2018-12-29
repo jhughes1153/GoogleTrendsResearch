@@ -16,6 +16,7 @@ import time
 import os
 import datetime as dt
 
+_current_year = int(dt.datetime.now().strftime('%Y'))
 
 class GoogleTrends:
     """A class that will be used to extract data from google and puts
@@ -35,8 +36,6 @@ class GoogleTrends:
         self.keywords_df = pd.DataFrame()
         self.quote = quote
         self.recurse_break = 0
-        self.state = 0
-        self.date_range_week = date_range_week
         print('Getting values for ' + quote)
         self.scrape_data(keywords)
 
@@ -83,101 +82,56 @@ class GoogleTrends:
         # if only passed 1 value then make make it a list still
         if isinstance(keywords, str): keywords = [keywords]
         # iterate over keywords
+        initial_state = True
         for keyword in keywords:
             print('getting trends for', keyword)
-            if keyword not in self.keywords_df.columns:
-                
-                new_keyword = new_keywords(keyword)
-                
-                # this code here to make sure that we get the url and it will keep trying until we get it
-                breakout = 0
-                while(breakout < 3):
-                    try:
-                            # grab the html and enable the javascript
-                        if(self.date_range_week):
-                            driver.get('http://trends.google.com/trends/explore?date=now%207-d&geo=US&q=' + new_keyword)
-                        else:
-                            driver.get('http://trends.google.com/trends/explore?date=today%203-m&geo=US&q=' + new_keyword)
-                        
-                        # sleep to make sure that the js executes
-                        time.sleep(6)
-        
-                        # #put the html into a string basically
-                        html = driver.page_source
+            new_keyword = new_keywords(keyword)
+            
+            # this code here to make sure that we get the url and it will keep trying until we get it
+            breakout = 0
+            while(breakout < 3):
+                try:
+                    # grab the html and enable the javascript
+                    # https://trends.google.com/trends/explore?date=now%201-d&geo=US&q=amd
+                    driver.get('http://trends.google.com/trends/explore?date=now%201-d&geo=US&q={}'.format(new_keyword))
+
+                    
+                    # sleep to make sure that the js executes
+                    time.sleep(6)
     
-                        # #Put the string into beautiful soup
-                        soup = BeautifulSoup(html, 'lxml')
-                        
-                        # find all tables 
-                        table = soup.find('table')
-                        
-                        # find the values in the table
-                        values = table.find_all('td')
-                        
-                        # add the values to python lists, could use numpy to speed up,
-                        # but it is only 261 long always so why not use that
-                        count = 0
-                        dates, dates_conv, nums = [], [], []
-                        
-                        for value in values:
-                            if(count % 2 == 0):
-                                if(self.state == 1):
-                                    pass
-                                else:
-                                    dates.append(value.getText()[1:-1])
-                            else:
-                                nums.append(value.getText())
-                            count += 1
-                            
-                        # state machine for the dates so that we do not keep trying to add it to the column
-                        if(self.state == 0):
-                            now = dt.datetime.now()
-                            if(self.date_range_week):
-                                """We need this loop because the dates come in a different format than yahoo
-                                so to do the sql this needs to be changed and we need to add a day since google 
-                                updates the values on sunday, and the market opens monday
-                                """
-                                for i in range(len(dates)):
-                                    my_date = dt.datetime.strptime(dates[i], '%b %d at %I:%M %p')
-                                    my_date = my_date.replace(year=now.year)
-                                    dates_conv.append(my_date)
-                                self.keywords_df['date_values'] = dates_conv
-                                self.state = 1
-                            else:
-                                for i in range(len(dates)):
-                                    my_date = dt.datetime.strptime(dates[i], '%b %d')
-                                    my_date = my_date.replace(year=now.year)
-                                    dates_conv.append(my_date)
-                                self.keywords_df['date_values'] = dates_conv
-                                self.state = 1
-                        
-                        print(self.keywords_df.shape)
-                        print(len(nums))
-                        # try this just in case it is a different size in the file
-                        if(len(nums) == len(self.keywords_df.date_values)):
-                            self.keywords_df[keyword.replace(' ', '_').replace('&', 'and')] = nums
-                            # print(self.keywords.head())
-                        else:
-                            print('column not the right shape, using zeros')
-                            self.keywords_df[keyword.replace(' ', '_').replace('&', 'and')] = np.zeros(len(self.keywords_df.date_values))
-                        breakout = 3
-                        
-                    except Exception as ex:
-                        print(ex)
-                        # if did not get url add 1 to breakout so we arent in a loop for a url that does not exist
-                        breakout += 1
-                        if(breakout < 3):
-                            # make a not in the file and wait
-                            print('trying again after waiting for 5 seconds')
-                            time.sleep(5)
-                        else:
-                            # make a note that we could not get the url and then add a column of zeros to it
-                            self.keywords_df[keyword.replace(' ', '_').replace('&', 'and')] = np.zeros(len(self.keywords_df.date_values))
-                            print('Skipping column could not get url')
-                
-            else:
-                # just print as we do not really care if the keyword is already in the file as it most likely will not be     
-                print('That keyword already exists')
+                    # #put the html into a string basically
+                    html = driver.page_source
+                    
+                    # #Put the string into beautiful soup
+                    soup = BeautifulSoup(html, 'lxml')
+                    
+                    # find all tables 
+                    table = soup.find('table')
+                    
+                    temp_df = pd.read_html(str(table))[0]
+                    
+                    temp_df = temp_df.rename(index=str, columns={'x':'date_values', 'y1': keyword.replace(' ', '_').replace('&', 'and')})
+                    temp_df['date_values'] = temp_df['date_values'].str[1:-1]
+                    temp_df['date_values'] = pd.to_datetime(temp_df['date_values'], format='%b %d at %I:%M %p').apply(lambda x: x.replace(year=_current_year))
+
+                    if initial_state:
+                        self.keywords_df = temp_df
+                        initial_state = False
+                    else:
+                        self.keywords_df = self.keywords_df.merge(temp_df, on='date_values')
+                    breakout = 3
+                except Exception as ex:
+                    print(ex)
+                    # if did not get url add 1 to breakout so we arent in a loop for a url that does not exist
+                    breakout += 1
+                    if(breakout < 3):
+                        # make a not in the file and wait
+                        print('trying again after waiting for 5 seconds')
+                        time.sleep(5)
+                    else:
+                        # make a note that we could not get the url and then add a column of zeros to it
+                        self.keywords_df[keyword.replace(' ', '_').replace('&', 'and')] = np.zeros(len(self.keywords_df.date_values))
+                        print('Skipping column could not get url')
         driver.quit()
                 
     def return_dataframe(self):
@@ -227,6 +181,7 @@ if __name__ == '__main__':
     #         keys[i] = keys[i][1:]
     #===========================================================================
      
-    googleTrendsScrape = GoogleTrends('aapl', ['S&P'])
-    googleTrendsScrape.print_head()
+    googleTrendsScrape = GoogleTrends('aapl', ['debt', 'dow'])
+    df = googleTrendsScrape.return_dataframe()
+    print(df.head())
 

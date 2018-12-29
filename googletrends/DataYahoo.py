@@ -154,9 +154,11 @@ class DiviScrape():
         print('Dividend Information:')
         print(self.divi_df.shape)
         print(self.divi_df)
+        print(self.divi_df.columns.values)
         print('Stock information:')
         print(self.data_df.shape)
         print(self.data_df.head())
+        print(self.data_df.columns.values)
         
     def return_dataframes(self):
         """A function that returns the dataframe for the stock and 
@@ -164,11 +166,9 @@ class DiviScrape():
         """
         return self.data_df, self.divi_df
                     
-#===============================================================================
-# if __name__ == '__main__':
-#     a = DiviScrape('aapl')
-#     a.print_dataframe_heads()
-#===============================================================================
+if __name__ == '__main__':
+    a = DiviScrape('aapl')
+    a.print_dataframe_heads()
         
         
         

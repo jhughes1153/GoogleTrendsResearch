@@ -20,11 +20,11 @@ def main(db):
     print("appending to database")
     keywords_list = ["Trump", "President", "Debt", "Loan", "Mortgage", "Utilities", "Dow Jones", "Stock market", "Trading", "Dog",
                      "Spy", "S&P", "Economy", "Election", "Apple", "Politics", "Unemployment", "Interest rates", "Fed funds rate"]
-
+  
     GoogT = GoogleTrends("SPY", keywords_list)
-    
+      
     df_goog = GoogT.return_dataframe()
-    
+      
     # save to dataframe just in case
     today = dt.date.today()
     df_goog.to_csv('/home/jack/google_trends_{}.csv'.format(str(today)))
@@ -33,9 +33,9 @@ def main(db):
 
     df_yahoo_price, df_yahoo_divi = ScrapeYahoo.return_dataframes()
     
-    db.append_to_database(df_yahoo_price, "SPYPRICING")
-    db.append_to_database(df_yahoo_divi, "SPYDIVI")
-    db.append_to_database(df_goog, "spy_keywords")
+    db.append_to_database(df_yahoo_price.iloc[[-1]], "SPYPRICING_YAHOO")
+    db.append_to_database(df_yahoo_divi, "SPYDIVI_YAHOO")
+    db.append_to_database(df_goog, "SPYKEYWORDS")
     
     print("Finished appending tables")
     
