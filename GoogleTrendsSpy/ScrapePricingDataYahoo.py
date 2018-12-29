@@ -254,7 +254,8 @@ class FindDividends():
                        
 if __name__ == '__main__':
     a = DataDiviScrape('spy')
-    a.print_dataframe_heads()
+    b = a.return_dataframes()[0]
+    print(b.iloc[[-1]])
     # b = a.return_dataframes()[0]
     # b.to_csv(r"C:\Users\Jack\amd.csv")
         
