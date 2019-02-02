@@ -27,12 +27,13 @@ def main(db):
       
     # save to dataframe just in case
     today = dt.date.today()
-    df_goog.to_csv('/home/jack/google_trends_{}.csv'.format(str(today)))
+    df_goog.to_csv('/home/jack/logging/google_trends_{}.csv'.format(str(today)))
     
     ScrapeYahoo = DataDiviScrape("SPY")
 
     df_yahoo_price, df_yahoo_divi = ScrapeYahoo.return_dataframes()
     
+    #Why is this having so many issues?
     db.append_to_database(df_yahoo_price.iloc[[-1]], "SPYPRICING_YAHOO")
     db.append_to_database(df_yahoo_divi, "SPYDIVI_YAHOO")
     db.append_to_database(df_goog, "SPYKEYWORDS")
@@ -46,5 +47,4 @@ def main(db):
 if __name__ == '__main__':
     db = HandleDB()
     sys.exit(main(db))
-    
-    
+
