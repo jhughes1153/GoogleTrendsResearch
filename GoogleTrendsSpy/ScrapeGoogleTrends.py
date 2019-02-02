@@ -97,7 +97,7 @@ class GoogleTrends:
 
                     
                     # sleep to make sure that the js executes
-                    time.sleep(6)
+                    time.sleep(10)
     
                     # #put the html into a string basically
                     html = driver.page_source
@@ -113,10 +113,12 @@ class GoogleTrends:
                     temp_df = temp_df.rename(index=str, columns={'x':'date_values', 'y1': keyword.replace(' ', '_').replace('&', 'and')})
                     temp_df['date_values'] = temp_df['date_values'].str[1:-1]
                     temp_df['date_values'] = pd.to_datetime(temp_df['date_values'], format='%b %d at %I:%M %p').apply(lambda x: x.replace(year=_current_year))
-
+                    print('{} is of shape {}'.format(new_keyword, temp_df.shape))
                     if initial_state:
                         self.keywords_df = temp_df
                         initial_state = False
+                        with open('/home/jackh/logging/output_first_search_{}.html'.format(dt.date.today()), 'w+') as file_writer:
+                            file_writer.write(html)
                     else:
                         self.keywords_df = self.keywords_df.merge(temp_df, on='date_values')
                     breakout = 3

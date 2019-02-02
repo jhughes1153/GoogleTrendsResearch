@@ -52,6 +52,10 @@ class HandleDB:
         """
         return pd.read_sql("SELECT * FROM {}".format(table_name), self.cnxn)
 
-# a = HandleDB()
-# b = a.get_most_recent_date()
-# print(b)     
+    def delete_from_table(self, table_name, day):
+        """
+        deletes from the table for a certain day
+        :param table_name: name of the table to delete from
+        :param day: string for the day to delete
+        """
+        self.cnxn.execute("DELETE FROM {} WHERE DATE(date_values) = '{}'".format(table_name, day))
