@@ -24,6 +24,7 @@ def main(db):
     GoogT = GoogleTrends("SPY", keywords_list)
       
     df_goog = GoogT.return_dataframe()
+    print(df_goog.head())
       
     # save to dataframe just in case
     today = dt.date.today()
@@ -33,7 +34,7 @@ def main(db):
 
     df_yahoo_price, df_yahoo_divi = ScrapeYahoo.return_dataframes()
     
-    #Why is this having so many issues?
+    # Why is this having so many issues?
     db.append_to_database(df_yahoo_price.iloc[[-1]], "SPYPRICING_YAHOO")
     db.append_to_database(df_yahoo_divi, "SPYDIVI_YAHOO")
     db.append_to_database(df_goog, "SPYKEYWORDS")
