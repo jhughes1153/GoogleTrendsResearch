@@ -9,7 +9,8 @@ import argparse
 def send_message(failed, reasons):
     if failed:
         # red box will be posted with this one
-        post_params = f'{{"bot_id": "ac960a6f08227f9b603e8d8859", "text": "{reasons}", "attachments": [{{"type": "image", "url": "https://i.groupme.com/600x446.png.44de5706526a41a0ae3038e7714bbcce"}}]}}'
+        post_params = f'{{"bot_id": "ac960a6f08227f9b603e8d8859", "text": "{reasons}", "attachments": ' \
+            f'[{{"type": "image", "url": "https://i.groupme.com/600x446.png.44de5706526a41a0ae3038e7714bbcce"}}]}}'
     else:
         # green box will post with this one
         post_params = '{"text": "Task failed successfully", "bot_id": "ac960a6f08227f9b603e8d8859", ' \
