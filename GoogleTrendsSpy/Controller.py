@@ -11,6 +11,7 @@ import datetime as dt
 from ScrapeGoogleTrends import GoogleTrends
 from ScrapePricingDataYahoo import DataDiviScrape
 from CommWithDatabase import HandleDB
+from scrap_iex_data import grab_iex_df
 
     
 def main(db):
@@ -26,7 +27,7 @@ def main(db):
     df_goog = GoogT.return_dataframe()
     print(df_goog.head())
       
-    # save to dataframe just in case
+    # save to csv just in case
     today = dt.date.today()
     df_goog.to_csv('/home/jack/logging/google_trends_{}.csv'.format(str(today)))
     
@@ -38,6 +39,7 @@ def main(db):
     db.append_to_database(df_yahoo_price.iloc[[-1]], "SPYPRICING_YAHOO")
     db.append_to_database(df_yahoo_divi, "SPYDIVI_YAHOO")
     db.append_to_database(df_goog, "SPYKEYWORDS")
+    db.append_to_database(grab_iex_df(), "SPYPRICING_IEX")
     
     print("Finished appending tables")
     
