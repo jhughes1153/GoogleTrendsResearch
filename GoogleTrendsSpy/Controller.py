@@ -13,6 +13,13 @@ from ScrapePricingDataYahoo import DataDiviScrape
 from CommWithDatabase import HandleDB
 from scrap_iex_data import grab_iex_df
 
+
+def check_day():
+    if dt.date.today().weekday() in range(1, 6):
+        return True
+    else:
+        return False
+
     
 def main(db):
     """A way to append to the database, it gets the most recent date
@@ -39,7 +46,10 @@ def main(db):
     db.append_to_database(df_yahoo_price.iloc[[-1]], "SPYPRICING_YAHOO")
     db.append_to_database(df_yahoo_divi, "SPYDIVI_YAHOO")
     db.append_to_database(df_goog, "SPYKEYWORDS")
-    db.append_to_database(grab_iex_df(), "SPYPRICING_IEX")
+    if check_day():
+        db.append_to_database(grab_iex_df(), "SPYPRICING_IEX")
+    else:
+        print('Not doing iex today as it is a t+1 table')
     
     print("Finished appending tables")
     

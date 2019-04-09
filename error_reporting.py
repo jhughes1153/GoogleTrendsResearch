@@ -33,6 +33,25 @@ def check_db_insert():
         return True
 
 
+def check_day():
+    if dt.date.today().weekday() in range(1, 6):
+        return True
+    else:
+        return False
+
+
+def check_iex_pricing():
+    cnxn = create_engine("mysql+pymysql://root:#1Runner!!@localhost:3306/SpyInformation")
+    max_date = cnxn.execute("SELECT MAX(TRADEDATE) FROM SpyInformation.SPYPRICING_IEX").fetchall()[0][0]
+
+    today = dt.date.today() - dt.timedelta(days=1)
+
+    if today == max_date.date():
+        return False
+    else:
+        return True
+
+
 def check_csv_exists(csv_path):
     today = dt.date.today().strftime('%Y-%m-%d')
     csv_final = f'{csv_path}/google_trends_{today}.csv'
@@ -53,6 +72,12 @@ def main():
 
     failed_db = check_db_insert()
     failed_path = check_csv_exists(args.csv_path)
+    if check_day():
+        if check_iex_pricing():
+            failed = True
+            reasons.append("No Iex values for today")
+    else:
+        print('Skipping iex check for today as the market was not open and it did not run')
 
     if failed_db:
         failed = True
