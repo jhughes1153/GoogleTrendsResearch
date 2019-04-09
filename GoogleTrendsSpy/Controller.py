@@ -15,7 +15,7 @@ from scrap_iex_data import grab_iex_df
 
 
 def check_day():
-    if dt.date.today().weekday() in range(1, 6):
+    if dt.date.today().weekday() in range(1, 7):
         return True
     else:
         return False
