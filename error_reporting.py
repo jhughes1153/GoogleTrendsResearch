@@ -46,7 +46,7 @@ def check_iex_pricing():
 
     today = dt.date.today() - dt.timedelta(days=1)
 
-    if today == max_date.date():
+    if today == max_date:
         return False
     else:
         return True
