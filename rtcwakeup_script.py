@@ -20,10 +20,11 @@ def main():
     now = now.replace(hour=6, minute=20, second=0, microsecond=0)
 
     os.system("""sudo rtcwake -m no -l -t "$(date -d '{}' '+%s')" """.format(now))
-    
+
     time.sleep(10)
     
     os.system("""sudo poweroff""")
+
 
 if __name__ == '__main__':
     sys.exit(main())
