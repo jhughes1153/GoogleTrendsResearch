@@ -12,6 +12,7 @@ from ScrapeGoogleTrends import GoogleTrends
 from ScrapePricingDataYahoo import DataDiviScrape
 from CommWithDatabase import HandleDB
 from scrap_iex_data import grab_iex_df
+import data_collector
 
 
 def check_day():
@@ -19,6 +20,42 @@ def check_day():
         return True
     else:
         return False
+
+
+def main_2(db):
+    """
+    Handle the movement of the data into the database
+    :param db:
+    :return:
+    """
+    print("appending to database")
+    keywords_list = ["Trump", "President", "Debt", "Loan", "Mortgage", "Utilities", "Dow Jones", "Stock market",
+                     "Trading", "Dog",
+                     "Spy", "S&P", "Economy", "Election", "Apple", "Politics", "Unemployment", "Interest rates",
+                     "Fed funds rate"]
+
+    df_goog = data_collector.google_trends(keywords_list)
+    print(df_goog.head())
+
+    # save to csv just in case
+    today = dt.date.today()
+    df_goog.to_csv('/home/jack/logging/google_trends_{}.csv'.format(str(today)))
+
+    df_yahoo_price, df_yahoo_divi = data_collector.yahoo_pricing("SPY")
+
+    # Why is this having so many issues?
+    db.append_to_database(df_yahoo_price.iloc[[-1]], "SPYPRICING_YAHOO")
+    db.append_to_database(df_yahoo_divi, "SPYDIVI_YAHOO")
+    db.append_to_database(df_goog, "SPYKEYWORDS")
+    if check_day():
+        db.append_to_database(data_collector.grab_iex_df(), "SPYPRICING_IEX")
+    else:
+        print('Not doing iex today as it is a t+1 table')
+
+    print("Finished appending tables")
+
+    with open('/home/jack/cronwrapper.txt', 'w') as writer_file:
+        writer_file.write('Finished writting')
 
     
 def main(db):
@@ -58,6 +95,6 @@ def main(db):
     
 
 if __name__ == '__main__':
-    db = HandleDB()
-    sys.exit(main(db))
+    database = HandleDB()
+    sys.exit(main_2(database))
 
