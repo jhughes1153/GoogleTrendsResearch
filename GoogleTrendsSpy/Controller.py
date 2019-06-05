@@ -48,7 +48,7 @@ def main_2(db):
     db.append_to_database(df_yahoo_divi, "SPYDIVI_YAHOO")
     db.append_to_database(df_goog, "SPYKEYWORDS")
     if check_day():
-        db.append_to_database(data_collector.grab_iex_df(), "SPYPRICING_IEX")
+        db.append_to_database(data_collector.iex_pricing(), "SPYPRICING_IEX")
     else:
         print('Not doing iex today as it is a t+1 table')
 
