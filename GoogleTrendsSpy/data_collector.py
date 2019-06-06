@@ -266,8 +266,8 @@ def yahoo_pricing(quote, date_range_week=True):
     return data_df, divi_df
 
 
-def iex_pricing():
-    iex_values = requests.get("https://api.iextrading.com/1.0/stock/aapl/chart/1d")
+def iex_pricing(stock):
+    iex_values = requests.get(f"https://api.iextrading.com/1.0/stock/{stock}/chart/1d")
 
     iex_df = pd.DataFrame(iex_values.json())
     iex_df.columns = [c.upper() for c in iex_df.columns]
