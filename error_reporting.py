@@ -72,12 +72,12 @@ def main():
 
     failed_db = check_db_insert()
     failed_path = check_csv_exists(args.csv_path)
-    if check_day():
-        if check_iex_pricing():
-            failed = True
-            reasons.append("No Iex values for today")
-    else:
-        print('Skipping iex check for today as the market was not open and it did not run')
+    # if check_day():
+    #     if check_iex_pricing():
+    #         failed = True
+    #         reasons.append("No Iex values for today")
+    # else:
+    #     print('Skipping iex check for today as the market was not open and it did not run')
 
     if failed_db:
         failed = True
