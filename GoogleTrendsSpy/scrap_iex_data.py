@@ -8,6 +8,8 @@ from CommWithDatabase import HandleDB
 def grab_iex_df(stock: str, date: str) -> pd.DataFrame:
     iex_values = requests.get(f"https://api.iextrading.com/1.0/stock/{stock}/chart/date/{date}")
 
+    print(iex_values.url)
+
     iex_df = pd.DataFrame(iex_values.json())
     iex_df.columns = [c.upper() for c in iex_df.columns]
     iex_df = iex_df.rename(index=str, columns={'DATE': 'TRADEDATE'})
@@ -41,21 +43,18 @@ def main():
 
     db = HandleDB()
 
-    try:
-        starter = dt.datetime.strptime(args.start_date, '%Y%m%d').date()
-        dates = dates_between_no_weekends(starter)
-        print(dates)
+    starter = dt.datetime.strptime(args.start_date, '%Y%m%d').date()
+    dates = dates_between_no_weekends(starter)
+    print(dates)
 
-        for d in dates:
-            print(d)
-            try:
-                db.append_to_database(grab_iex_df(f"{args.stock}", d), f"{args.stock}PRICING_IEX")
-            except KeyError:
-                print(f'Failed for {d}')
+    grab_iex_df(f"{args.stock}", '20190617'), f"{args.stock}PRICING_IEX"
 
-    except ValueError:
-        print("not a valid input for start date must be %Y%m%d")
-        return 1
+    # for d in dates:
+    #     print(d)
+    #     try:
+    #         db.append_to_database(grab_iex_df(f"{args.stock}", d), f"{args.stock}PRICING_IEX")
+    #     except KeyError:
+    #         print(f'Failed for {d}')
 
     return 0
 
