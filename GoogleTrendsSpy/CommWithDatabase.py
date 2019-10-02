@@ -18,7 +18,7 @@ class HandleDB:
     
     def __init__(self):
         print('Opening connection to the server')
-        self.cnxn = create_engine("mysql+pymysql://root:#1Runner!!@localhost:3306/SpyInformation")
+        self.cnxn = create_engine("mysql+pymysql://root:#1Runner!!@192.168.1.6:3306/SpyInformation")
         
     def get_most_recent_dates(self):
         """gets the most recent date to use for getting where to split the values in yahoo

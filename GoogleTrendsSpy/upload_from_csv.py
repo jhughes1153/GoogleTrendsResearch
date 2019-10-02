@@ -1,5 +1,5 @@
 """
-
+This shit is really bad and was made in eclipse
 """
 import sys
 from argparse import ArgumentParser

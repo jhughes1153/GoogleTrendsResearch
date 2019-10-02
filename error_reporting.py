@@ -22,7 +22,7 @@ def send_message(failed, reasons):
 
 
 def check_db_insert():
-    cnxn = create_engine("mysql+pymysql://root:#1Runner!!@localhost:3306/SpyInformation")
+    cnxn = create_engine("mysql+pymysql://root:#1Runner!!@192.168.1.6:3306/SpyInformation")
     max_date = cnxn.execute("SELECT MAX(date_values) FROM SpyInformation.SPYKEYWORDS").fetchall()[0][0]
 
     today = dt.date.today()
@@ -41,7 +41,7 @@ def check_day():
 
 
 def check_iex_pricing():
-    cnxn = create_engine("mysql+pymysql://root:#1Runner!!@localhost:3306/SpyInformation")
+    cnxn = create_engine("mysql+pymysql://root:#1Runner!!@192.168.1.6:3306/SpyInformation")
     max_date = cnxn.execute("SELECT MAX(TRADEDATE) FROM SpyInformation.SPYPRICING_IEX").fetchall()[0][0]
 
     today = dt.date.today() - dt.timedelta(days=1)
