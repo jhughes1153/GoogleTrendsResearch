@@ -56,9 +56,6 @@ def main_2(db):
 
     print("Finished appending tables")
 
-    with open('/home/jack/cronwrapper.txt', 'w') as writer_file:
-        writer_file.write('Finished writting')
-
     
 def main(db):
     """A way to append to the database, it gets the most recent date

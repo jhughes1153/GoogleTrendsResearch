@@ -1,6 +1,6 @@
 import datetime as dt
-import os
 import time
+import logging
 
 import numpy as np
 import pandas as pd
@@ -9,22 +9,24 @@ from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
 import requests
 import json
+import os
 
 _current_year = int(dt.datetime.now().strftime('%Y'))
+logging = logging.getLogger(__name__)
 
 
 def google_trends(keywords):
     """This method uses selenium to open a page and get the value
-            from google trends by running the javascript, it then takes
-            it and adds the values to an already made csv file, this is
-            a bit slow because it has to load a new webpage through firefox
-            on the current pc
-            :Param keywords: accepts a single string to check, cant get the html to
-                work properlly with this, damn
+    from google trends by running the javascript, it then takes
+    it and adds the values to an already made csv file, this is
+    a bit slow because it has to load a new webpage through firefox
+    on the current pc
+    :Param keywords: accepts a single string to check, cant get the html to
+        work properlly with this, damn
 
-            right now this is set up so that if you run once it gets all values
-            passed in, so if you are updating the keywords it is not corrected yet
-            """
+    right now this is set up so that if you run once it gets all values
+    passed in, so if you are updating the keywords it is not corrected yet
+    """
 
     def new_keywords(key):
         """This method is here in order to add the %20 to the keywords in the list
@@ -52,8 +54,8 @@ def google_trends(keywords):
     # a new browser window
     options = Options()
     options.set_headless(headless=True)
-    driver = webdriver.Firefox(executable_path='/home/jack/Downloads/geckodriver-v0.23.0-linux64/geckodriver',
-                               options=options)
+    gecko_path = f"{os.path.dirname(os.path.abspath(__file__))}/extras/geckodriver"
+    driver = webdriver.Firefox(executable_path=gecko_path, options=options)
 
     # if only passed 1 value then make make it a list still
     if isinstance(keywords, str):
@@ -61,7 +63,8 @@ def google_trends(keywords):
     # iterate over keywords
     initial_state = True
     for keyword in keywords:
-        print('getting trends for', keyword)
+        logging.info(f'getting trends for {keyword}')
+        print(f'getting trends for {keyword}')
         new_keyword = new_keywords(keyword)
 
         # this code here to make sure that we get the url and it will keep trying until we get it
@@ -91,30 +94,27 @@ def google_trends(keywords):
                 temp_df['date_values'] = temp_df['date_values'].str[1:-1]
                 temp_df['date_values'] = pd.to_datetime(temp_df['date_values'], format='%b %d at %I:%M %p').apply(
                     lambda x: x.replace(year=_current_year))
-                print('{} is of shape {}'.format(new_keyword, temp_df.shape))
+                logging.info('{} is of shape {}'.format(new_keyword, temp_df.shape))
 
                 if initial_state:
-                    with open('/home/jack/logging/output_first_search_{}.html'.format(dt.date.today()),
-                              'w+') as file_writer:
-                        file_writer.write(html)
                     keywords_df = temp_df
                     initial_state = False
                 else:
                     keywords_df = keywords_df.merge(temp_df, on='date_values')
                 breakout = 3
             except Exception as ex:
-                print(ex)
+                logging.error(ex)
                 # if did not get url add 1 to breakout so we arent in a loop for a url that does not exist
                 breakout += 1
                 if breakout < 3:
                     # make a not in the file and wait
-                    print('trying again after waiting for 5 seconds')
+                    logging.info('trying again after waiting for 5 seconds')
                     time.sleep(5)
                 else:
                     # make a note that we could not get the url and then add a column of zeros to it
                     keywords_df[keyword.replace(' ', '_').replace('&', 'and')] = np.zeros(
                         len(keywords_df.date_values))
-                    print('Skipping column could not get url')
+                    logging.warning('Skipping column could not get url')
     driver.quit()
 
     return keywords_df
