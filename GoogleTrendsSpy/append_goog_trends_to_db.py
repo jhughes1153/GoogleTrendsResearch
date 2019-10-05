@@ -37,7 +37,7 @@ def make_symlink(df: pd.DataFrame, path: str, sym_name: str, sep: str) -> None:
         logger.info(f"Unlinking {symlink_path}")
         os.unlink(symlink_path)
     os.symlink(true_path, symlink_path)
-    alerter.info(f"updated symlink for {true_path} to {symlink_path}")
+    alerter.info(f"updated symlink for {today}")
 
 
 def main_impl(args):
