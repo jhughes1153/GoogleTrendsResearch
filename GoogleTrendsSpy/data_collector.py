@@ -12,7 +12,7 @@ import json
 import os
 
 _current_year = int(dt.datetime.now().strftime('%Y'))
-logging = logging.getLogger(__name__)
+logger = logging.getLogger('google_trends_analysis')
 
 
 def google_trends(keywords):
@@ -63,8 +63,8 @@ def google_trends(keywords):
     # iterate over keywords
     initial_state = True
     for keyword in keywords:
-        logging.info(f'getting trends for {keyword}')
-        print(f'getting trends for {keyword}')
+        logger.info(f'getting trends for {keyword}')
+        # print(f'getting trends for {keyword}')
         new_keyword = new_keywords(keyword)
 
         # this code here to make sure that we get the url and it will keep trying until we get it
@@ -94,27 +94,30 @@ def google_trends(keywords):
                 temp_df['date_values'] = temp_df['date_values'].str[1:-1]
                 temp_df['date_values'] = pd.to_datetime(temp_df['date_values'], format='%b %d at %I:%M %p').apply(
                     lambda x: x.replace(year=_current_year))
-                logging.info('{} is of shape {}'.format(new_keyword, temp_df.shape))
+                logger.info('{} is of shape {}'.format(new_keyword, temp_df.shape))
 
-                if initial_state:
-                    keywords_df = temp_df
-                    initial_state = False
+                if len(temp_df) == 0:
+                    logging.error(f"Cannot continue with this dataframe so skipping keyword {keyword}")
                 else:
-                    keywords_df = keywords_df.merge(temp_df, on='date_values')
+                    if initial_state:
+                        keywords_df = temp_df
+                        initial_state = False
+                    else:
+                        keywords_df = keywords_df.merge(temp_df, on='date_values')
                 breakout = 3
             except Exception as ex:
-                logging.error(ex)
+                logger.error(ex)
                 # if did not get url add 1 to breakout so we arent in a loop for a url that does not exist
                 breakout += 1
                 if breakout < 3:
                     # make a not in the file and wait
-                    logging.info('trying again after waiting for 5 seconds')
+                    logger.info('trying again after waiting for 5 seconds')
                     time.sleep(5)
                 else:
                     # make a note that we could not get the url and then add a column of zeros to it
                     keywords_df[keyword.replace(' ', '_').replace('&', 'and')] = np.zeros(
                         len(keywords_df.date_values))
-                    logging.warning('Skipping column could not get url')
+                    logger.warning('Skipping column could not get url')
     driver.quit()
 
     return keywords_df

@@ -10,7 +10,7 @@ from alerting import get_alerter
 from CommWithDatabase import HandleDB
 
 __app__ = f"google_trends_{getpass.getuser()}"
-logger = get_logger(__name__, __app__)
+logger = get_logger('google_trends_analysis', __app__)
 alerter = get_alerter()
 
 
