@@ -5,11 +5,12 @@ import os
 import datetime as dt
 import pandas as pd
 import glob
+import getpass
 from alerting import get_alerter
 from CommWithDatabase import HandleDB
 
-__app__ = "google_trends"
-logger = get_logger(__name__, __app__)
+__app__ = f"google_trends_{getpass.getuser()}"
+logger = get_logger('google_trends_analysis', __app__)
 alerter = get_alerter()
 
 
@@ -49,10 +50,11 @@ def main_impl(args):
 
     make_symlink(df_goog, args.path, __app__, args.sep)
 
-    db = HandleDB()
-    db.append_to_database(df_goog, args.table)
-    logger.info(f"Appended df into {args.table}")
-    alerter.info(f"Appended df into {args.table}")
+    if not args.just_file:
+        db = HandleDB()
+        db.append_to_database(df_goog, args.table)
+        logger.info(f"Appended df into {args.table}")
+        alerter.info(f"Appended df into {args.table}")
 
 
 def main():
@@ -62,6 +64,7 @@ def main():
     parser.add_argument("--table", help="table to insert into", required=True)
     parser.add_argument("--path", help="path to keep the csv", required=True)
     parser.add_argument("--sep", help="seperator", default="|")
+    parser.add_argument("--just-file", help="generate just the file", action="store_true")
     args = parser.parse_args()
 
     try:

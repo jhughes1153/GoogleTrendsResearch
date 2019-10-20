@@ -2,12 +2,10 @@ import logging
 import os
 import getpass
 import datetime as dt
+import sys
 
 
 def get_logger(logger_, application: str):
-    logger = logging.getLogger(logger_)
-    logger.setLevel(logging.DEBUG)
-
     create_logging_dir()
 
     fh = logging.FileHandler(f'/home/{getpass.getuser()}/log/{application}_'
@@ -17,13 +15,27 @@ def get_logger(logger_, application: str):
     fh.setFormatter(formatter)
     sh.setFormatter(formatter)
 
+    logger = logging.getLogger(logger_)
+    logger.setLevel(logging.DEBUG)
+
     logger.addHandler(sh)
     logger.addHandler(fh)
 
-    logging.info('%%%%%%%%%%%%%%%%%%%%%%%%%')
-    logging.info(f'{application}')
-    logging.info(f'%%%%%%%%%%%%%%%%%%%%%%%%%')
-    logging.info(f'Started at: {dt.datetime.now()}')
+    logger.info(f'%{"%" * (len(application)+2)}%')
+    logger.info(f'% {application} %')
+    logger.info(f'%{"%" * (len(application)+2)}%')
+    logger.info("Started at:")
+    logger.info(f'{dt.datetime.now()}')
+    logger.info("Executable path:")
+    logger.info(f"{sys.executable}")
+    logger.info("Current system path:")
+    logger.info(f"{sys.path}")
+    logger.info("Platform:")
+    logger.info(f"{sys.platform}")
+    logger.info("Version:")
+    logger.info(f"{sys.version}")
+    logger.info("Passed args:")
+    logger.info(f"{sys.argv}")
 
     return logger
 
