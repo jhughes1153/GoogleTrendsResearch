@@ -8,6 +8,7 @@ import glob
 import getpass
 from alerting import get_alerter
 from CommWithDatabase import HandleDB
+import traceback
 
 __app__ = f"google_trends_{getpass.getuser()}"
 logger = get_logger('google_trends_analysis', __app__)
@@ -45,7 +46,8 @@ def main_impl(args):
 
     keywords = args.keywords.split(",")
     logger.info(keywords)
-    df_goog = google_trends(keywords)
+    logger.info(args.gecko_path)
+    df_goog = google_trends(keywords, args.gecko_path)
     logger.info(f"Google trends dataframe shape: {df_goog.shape}")
 
     make_symlink(df_goog, args.path, __app__, args.sep)
@@ -58,12 +60,16 @@ def main_impl(args):
 
 
 def main():
+    gecko_path = f"{os.path.dirname(os.path.abspath(__file__))}/extras/geckodriver_23"
+
     parser = ArgumentParser(description="New controller script to manage google trends stuff")
     parser.add_argument("--keywords", help="words to scrape from google trends",
                         default="Bitcoin,Altcoin,Ethereum,BTC,ETH,Crypto,Cryptocurrency,Currency")
     parser.add_argument("--table", help="table to insert into", required=True)
     parser.add_argument("--path", help="path to keep the csv", required=True)
     parser.add_argument("--sep", help="seperator", default="|")
+    parser.add_argument("--gecko-path", help="geckodriver path to use default is _23",
+                        default=gecko_path)
     parser.add_argument("--just-file", help="generate just the file", action="store_true")
     args = parser.parse_args()
 
@@ -71,6 +77,7 @@ def main():
         main_impl(args)
         logger.info("OK")
     except Exception as e:
+        logger.error(traceback.print_stack())
         logger.error(e)
         alerter.error("Task failed check log file")
         logger.error("FAIL")
