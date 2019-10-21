@@ -15,7 +15,7 @@ _current_year = int(dt.datetime.now().strftime('%Y'))
 logger = logging.getLogger('google_trends_analysis')
 
 
-def google_trends(keywords):
+def google_trends(keywords, geckodriver_path):
     """This method uses selenium to open a page and get the value
     from google trends by running the javascript, it then takes
     it and adds the values to an already made csv file, this is
@@ -54,7 +54,7 @@ def google_trends(keywords):
     # a new browser window
     options = Options()
     options.set_headless(headless=True)
-    gecko_path = f"{os.path.dirname(os.path.abspath(__file__))}/extras/geckodriver"
+    gecko_path = f"{os.path.dirname(os.path.abspath(__file__))}/extras/geckodriver_23"
     driver = webdriver.Firefox(executable_path=gecko_path, options=options)
 
     # if only passed 1 value then make make it a list still
