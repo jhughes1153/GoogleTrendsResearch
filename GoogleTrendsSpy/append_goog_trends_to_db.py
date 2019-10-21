@@ -8,6 +8,7 @@ import glob
 import getpass
 from alerting import get_alerter
 from CommWithDatabase import HandleDB
+import traceback
 
 __app__ = f"google_trends_{getpass.getuser()}"
 logger = get_logger('google_trends_analysis', __app__)
@@ -71,6 +72,7 @@ def main():
         main_impl(args)
         logger.info("OK")
     except Exception as e:
+        logger.error(traceback.print_stack())
         logger.error(e)
         alerter.error("Task failed check log file")
         logger.error("FAIL")
