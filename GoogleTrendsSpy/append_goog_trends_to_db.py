@@ -1,14 +1,14 @@
 from argparse import ArgumentParser
-from .logger import get_logger
-from .data_collector import google_trends
+from logger import get_logger
+from data_collector import google_trends
 import os
 import datetime as dt
 import pandas as pd
 import glob
 import getpass
-from .alerting import get_alerter
-from .CommWithDatabase import HandleDB
-from .common import log_on_failure
+from alerting import get_alerter
+from CommWithDatabase import HandleDB
+from common import log_on_failure
 
 __app__ = f"google_trends_{getpass.getuser()}"
 logger = get_logger('google_trends_analysis', __app__)
