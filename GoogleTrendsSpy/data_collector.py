@@ -9,118 +9,144 @@ from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
 import requests
 import json
-import os
 
 _current_year = int(dt.datetime.now().strftime('%Y'))
 logger = logging.getLogger('google_trends_analysis')
 
 
-def google_trends(keywords, geckodriver_path):
+def google_trends_df_gen(driver, keyword, breakout_num) -> pd.DataFrame:
+    key_df = pd.DataFrame()
+
+    for i in range(breakout_num):
+        try:
+            # grab the html and enable the javascript
+            # https://trends.google.com/trends/explore?date=now%201-d&geo=US&q=amd
+            driver.get('http://trends.google.com/trends/explore?date=now%201-d&geo=US&q={}'.format(keyword))
+
+            # sleep to make sure that the js executes
+            time.sleep(30)
+
+            # #put the html into a string basically
+            html = driver.page_source
+
+            # #Put the string into beautiful soup
+            soup = BeautifulSoup(html, 'lxml')
+
+            # find all tables
+            table = soup.find('table')
+
+            key_df = pd.read_html(str(table))[0]
+
+            key_df = key_df.rename(index=str, columns={'x': 'date_values',
+                                                       'y1': keyword.replace(' ', '_').replace('&', 'and')})
+            key_df['date_values'] = key_df['date_values'].str[1:-1]
+            key_df['date_values'] = pd.to_datetime(key_df['date_values'], format='%b %d at %I:%M %p').apply(
+                lambda x: x.replace(year=_current_year))
+            logger.info('{} is of shape {}'.format(keyword, key_df.shape))
+
+            break  # stop iterating if we actually got the df
+
+        except Exception as ex:
+            logger.error(ex)
+            # if did not get url add 1 to breakout so we arent in a loop for a url that does not exist
+            # make a not in the file and wait
+            logger.info('trying again after waiting for a minute')
+            time.sleep(60)
+
+    return key_df
+
+
+class DfContainer:
+    def __init__(self):
+        self.df_list = {}
+        self.df_len = 0
+
+    def combine_dfs(self) -> pd.DataFrame:
+        comb_df = pd.DataFrame()
+
+        if self.df_len == 0:
+            return comb_df
+
+        for keyword, df in self.df_list.items():
+            if 'date_values' in df.columns.values:  # make sure that the dataframe has at least 1 column with dates
+                comb_df = df
+                self.df_list.pop(keyword)
+                break
+
+        for keyword, df in self.df_list.items():
+            if len(df) == 0:
+                comb_df[keyword] = df
+            else:
+                comb_df = comb_df.merge(df, on='date_values')
+
+        return comb_df
+
+    @staticmethod
+    def __zeroify_col(df) -> pd.DataFrame:
+        df[df.columns.values[0].replace(' ', '_').replace('&', 'and')] = np.zeros(self.df_len)
+        return df
+
+    def add_df(self, keyword, df):
+        if len(df) > 0:
+            self.df_len = len(df)
+        self.df_list[keyword] = df
+
+
+def google_trends(keywords: list, geckodriver_path: str, breakout_num: int = 5) -> pd.DataFrame:
     """This method uses selenium to open a page and get the value
     from google trends by running the javascript, it then takes
     it and adds the values to an already made csv file, this is
     a bit slow because it has to load a new webpage through firefox
     on the current pc
     :Param keywords: accepts a single string to check, cant get the html to
-        work properlly with this, damn
+        work properly with this, damn
 
     right now this is set up so that if you run once it gets all values
     passed in, so if you are updating the keywords it is not corrected yet
     """
 
-    def new_keywords(key):
-        """This method is here in order to add the %20 to the keywords in the list
-        %20 is a space in googles queries
-        This little snippet is so that I dont need to put the %20 myself cause
-        that is annoying, if the string has a space then it will add this to
-        a new var, and it just keeps the old keyword if no space is present, basically
-        I can just pass in a list of strings and if they have a space itll add a new one
-        but it assumes only one space for the entire string, can add more later if it
-        ends up needing to, maybe n spaces will be needed
-        :param keyword: a single string
-        :return new_keyword: a new keyword that adds %20 instead of spaces
-        """
-        safe_keyword = ''
-        for i in range(len(keyword)):
-            if keyword[i] == ' ':
-                safe_keyword = safe_keyword + '%20'
-            else:
-                safe_keyword = safe_keyword + key[i]
-        return safe_keyword
-
-    keywords_df = pd.DataFrame()
+    keywords_df = DfContainer()
 
     # This is to set it so that selenium runs in headless and wont up
     # a new browser window
     options = Options()
     options.set_headless(headless=True)
-    gecko_path = f"{os.path.dirname(os.path.abspath(__file__))}/extras/geckodriver_23"
-    driver = webdriver.Firefox(executable_path=gecko_path, options=options)
+    # gecko_path = f"{os.path.dirname(os.path.abspath(__file__))}/extras/geckodriver_23"
+    driver = webdriver.Firefox(executable_path=geckodriver_path, options=options)
 
-    # if only passed 1 value then make make it a list still
-    if isinstance(keywords, str):
-        keywords = [keywords]
     # iterate over keywords
     initial_state = True
     for keyword in keywords:
         logger.info(f'getting trends for {keyword}')
         # print(f'getting trends for {keyword}')
-        new_keyword = new_keywords(keyword)
+        new_keyword = keyword.replace(' ', '%20')
+        logging.info(f'New keyword: {new_keyword}')
 
         # this code here to make sure that we get the url and it will keep trying until we get it
-        breakout = 0
-        while breakout < 3:
-            try:
-                # grab the html and enable the javascript
-                # https://trends.google.com/trends/explore?date=now%201-d&geo=US&q=amd
-                driver.get('http://trends.google.com/trends/explore?date=now%201-d&geo=US&q={}'.format(new_keyword))
+        temp_df = google_trends_df_gen(driver, new_keyword, breakout_num)
 
-                # sleep to make sure that the js executes
-                time.sleep(10)
+        keywords_df.add_df(keyword, temp_df)
 
-                # #put the html into a string basically
-                html = driver.page_source
+        if len(temp_df) == 0:
+            logging.error(f"Cannot continue with this dataframe so skipping keyword {keyword}")
 
-                # #Put the string into beautiful soup
-                soup = BeautifulSoup(html, 'lxml')
+        # else:
+        #     if initial_state:
+        #         keywords_df = temp_df
+        #         initial_state = False
+        #     else:
+        #         keywords_df = keywords_df.merge(temp_df, on='date_values')
+        #
+        #         # make a note that we could not get the url and then add a column of zeros to it
+        #         keywords_df[keyword.replace(' ', '_').replace('&', 'and')] = np.zeros(
+        #             len(keywords_df.date_values))
+        #         logger.warning('Skipping column could not get url')
 
-                # find all tables
-                table = soup.find('table')
+    keywords_combined_df = keywords_df.combine_dfs()
 
-                temp_df = pd.read_html(str(table))[0]
-
-                temp_df = temp_df.rename(index=str, columns={'x': 'date_values',
-                                                             'y1': keyword.replace(' ', '_').replace('&', 'and')})
-                temp_df['date_values'] = temp_df['date_values'].str[1:-1]
-                temp_df['date_values'] = pd.to_datetime(temp_df['date_values'], format='%b %d at %I:%M %p').apply(
-                    lambda x: x.replace(year=_current_year))
-                logger.info('{} is of shape {}'.format(new_keyword, temp_df.shape))
-
-                if len(temp_df) == 0:
-                    logging.error(f"Cannot continue with this dataframe so skipping keyword {keyword}")
-                else:
-                    if initial_state:
-                        keywords_df = temp_df
-                        initial_state = False
-                    else:
-                        keywords_df = keywords_df.merge(temp_df, on='date_values')
-                breakout = 3
-            except Exception as ex:
-                logger.error(ex)
-                # if did not get url add 1 to breakout so we arent in a loop for a url that does not exist
-                breakout += 1
-                if breakout < 3:
-                    # make a not in the file and wait
-                    logger.info('trying again after waiting for 5 seconds')
-                    time.sleep(5)
-                else:
-                    # make a note that we could not get the url and then add a column of zeros to it
-                    keywords_df[keyword.replace(' ', '_').replace('&', 'and')] = np.zeros(
-                        len(keywords_df.date_values))
-                    logger.warning('Skipping column could not get url')
     driver.quit()
 
-    return keywords_df
+    return keywords_combined_df
 
 
 def resolve_url(quote):

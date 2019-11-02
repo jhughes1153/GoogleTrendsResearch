@@ -1,14 +1,14 @@
 from argparse import ArgumentParser
-from logger import get_logger
-from data_collector import google_trends
+from .logger import get_logger
+from .data_collector import google_trends
 import os
 import datetime as dt
 import pandas as pd
 import glob
 import getpass
-from alerting import get_alerter
-from CommWithDatabase import HandleDB
-import traceback
+from .alerting import get_alerter
+from .CommWithDatabase import HandleDB
+from .common import log_on_failure
 
 __app__ = f"google_trends_{getpass.getuser()}"
 logger = get_logger('google_trends_analysis', __app__)
@@ -59,8 +59,9 @@ def main_impl(args):
         alerter.info(f"Appended df into {args.table}")
 
 
+@log_on_failure
 def main():
-    gecko_path = f"{os.path.dirname(os.path.abspath(__file__))}/extras/geckodriver_23"
+    gecko_path = f"{os.path.dirname(os.path.abspath(__file__))}/extras/geckodriver_21"
 
     parser = ArgumentParser(description="New controller script to manage google trends stuff")
     parser.add_argument("--keywords", help="words to scrape from google trends",
@@ -73,14 +74,7 @@ def main():
     parser.add_argument("--just-file", help="generate just the file", action="store_true")
     args = parser.parse_args()
 
-    try:
-        main_impl(args)
-        logger.info("OK")
-    except Exception as e:
-        logger.error(traceback.print_stack())
-        logger.error(e)
-        alerter.error("Task failed check log file")
-        logger.error("FAIL")
+    main_impl(args)
 
     alerter.send_message(__app__)
 
