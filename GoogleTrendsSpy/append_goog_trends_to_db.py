@@ -50,11 +50,14 @@ def main_impl(args):
     df_goog = google_trends(keywords, args.gecko_path)
     logger.info(f"Google trends dataframe shape: {df_goog.shape}")
 
-    make_symlink(df_goog, args.path, __app__, args.sep)
+    make_symlink(df_goog, args.path, f"google_trends_{args.table}", args.sep)
 
     if not args.just_file:
-        db = HandleDB()
-        db.append_to_database(df_goog, args.table)
+        db = HandleDB(args.db)
+        if args.db == 'mysql':
+            db.append_to_database(df_goog, args.table)
+        else:
+            db.append_to_database(df_goog, args.table.lower(), args.schema.lower())
         logger.info(f"Appended df into {args.table}")
         alerter.info(f"Appended df into {args.table}")
 
@@ -66,12 +69,14 @@ def main():
     parser = ArgumentParser(description="New controller script to manage google trends stuff")
     parser.add_argument("--keywords", help="words to scrape from google trends",
                         default="Bitcoin,Altcoin,Ethereum,BTC,ETH,Crypto,Cryptocurrency,Currency")
+    parser.add_argument("--schema", help='Schema to use, most likely given postgres is passed in')
     parser.add_argument("--table", help="table to insert into", required=True)
     parser.add_argument("--path", help="path to keep the csv", required=True)
     parser.add_argument("--sep", help="seperator", default="|")
     parser.add_argument("--gecko-path", help="geckodriver path to use default is _23",
                         default=gecko_path)
     parser.add_argument("--just-file", help="generate just the file", action="store_true")
+    parser.add_argument("--db", help='type fo the db to use mysql or postgres', choices=['mysql', 'postgres'])
     args = parser.parse_args()
 
     main_impl(args)
