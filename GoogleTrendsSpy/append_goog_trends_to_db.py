@@ -7,7 +7,7 @@ import pandas as pd
 import glob
 import getpass
 from alerting import get_alerter
-from CommWithDatabase import HandleDB
+from database import Database
 from common import log_on_failure
 
 __app__ = f"google_trends_{getpass.getuser()}"
@@ -53,11 +53,11 @@ def main_impl(args):
     make_symlink(df_goog, args.path, f"google_trends_{args.table}", args.sep)
 
     if not args.just_file:
-        db = HandleDB(args.db)
+        db = Database(args.db)
         if args.db == 'mysql':
-            db.append_to_database(df_goog, args.table)
+            db.copy(df_goog, args.schema.lower(), args.table.lower())
         else:
-            db.append_to_database(df_goog, args.table.lower(), args.schema.lower())
+            db.copy(df_goog, args.schema.lower(), args.table.lower())
         logger.info(f"Appended df into {args.table}")
         alerter.info(f"Appended df into {args.table}")
 

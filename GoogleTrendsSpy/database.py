@@ -38,6 +38,19 @@ class Database:
 
         return output
 
+    def copy(self, df: pd.DataFrame, schema: str, table: str) -> None:
+        with psycopg2.connect(host=self.db_config['HOST'],
+                              user=self.db_config['USER'],
+                              password=self.db_config['PASSWORD'],
+                              dbname=self.db_config['DATABASE'],
+                              cursor_factory=psycopg2.extras.RealDictCursor) as connection:
+            with connection.cursor() as cursor:
+                cursor.copy_from(df.to_csv(header=False, index=False), f'{schema}.{table}', sep=',')
+
+        if connection:
+            connection.close()
+
+
     def get_df(self, sql: str) -> pd.DataFrame:
         return pd.DataFrame(self.execute(sql))
 
