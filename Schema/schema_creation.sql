@@ -70,3 +70,44 @@ CREATE TABLE SpyInformation.BITCOINKEYWORDS(
 	Currency INT
 );
 
+CREATE TABLE SPY.SPYKEYWORDS (
+  date_values timestamp NOT NULL,
+  Trump int DEFAULT NULL,
+  President int DEFAULT NULL,
+  Debt int DEFAULT NULL,
+  Loan int DEFAULT NULL,
+  Mortgage int DEFAULT NULL,
+  Utilities int DEFAULT NULL,
+  Dow_Jones int DEFAULT NULL,
+  Stock_market int DEFAULT NULL,
+  Trading int DEFAULT NULL,
+  Dog int DEFAULT NULL,
+  Spy int DEFAULT NULL,
+  SandP int DEFAULT NULL,
+  Economy int DEFAULT NULL,
+  Election int DEFAULT NULL,
+  Apple int DEFAULT NULL,
+  Politics int DEFAULT NULL,
+  Unemployment int DEFAULT NULL,
+  Interest_rates int DEFAULT NULL,
+  Fed_funds_rate int DEFAULT NULL
+);
+
+CREATE TABLE BITCOIN.BITCOINPRICEINDEX (
+	RECEIVETIME TIMESTAMP,
+	USD_BTC DECIMAL(8, 4),
+	GBP_BTC DECIMAL(8, 4),
+	EUR_BTC DECIMAL(8, 4)
+);
+
+CREATE TABLE BITCOIN.BITCOINKEYWORDS (
+  date_values timestamp NOT NULL,
+  Bitcoin int DEFAULT NULL,
+  Altcoin int DEFAULT NULL,
+  Ethereum int DEFAULT NULL,
+  BTC int DEFAULT NULL,
+  ETH int DEFAULT NULL,
+  Crypto int DEFAULT NULL,
+  Cryptocurrency int DEFAULT NULL,
+  Currency int DEFAULT NULL
+);

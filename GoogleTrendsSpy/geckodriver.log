@@ -139,3 +139,19 @@ console.error: BroadcastService:
 
 1574040719902	Marionette	INFO	Stopped listening on port 43779
 [Parent 19941, Gecko_IOThread] WARNING: pipe error (68): Connection reset by peer: file /builddir/build/BUILD/firefox-66.0.2/ipc/chromium/src/chrome/common/ipc_channel_posix.cc, line 357
+1574213932667	mozrunner::runner	INFO	Running command: "/usr/bin/firefox" "-marionette" "-headless" "-foreground" "-no-remote" "-profile" "/tmp/rust_mozprofile.8jJZjdp4WY47"
+*** You are running in headless mode.
+1574213934368	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: mozillaAddons
+1574213934368	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: resource://pdf.js/
+1574213934368	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: about:reader*
+1574213938251	Marionette	INFO	Listening on port 36353
+1574213938368	Marionette	WARN	TLS certificate errors will be ignored for this session
+console.error: BroadcastService: 
+  receivedBroadcastMessage: handler for
+  remote-settings/monitor_changes
+  threw error:
+  Message: Error: Polling for changes failed: NetworkError when attempting to fetch resource..
+  Stack:
+    remoteSettingsFunction/remoteSettings.pollChanges@resource://services-settings/remote-settings.js:190:13
+
+1574214539996	Marionette	INFO	Stopped listening on port 36353
