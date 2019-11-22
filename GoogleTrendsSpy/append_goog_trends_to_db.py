@@ -47,21 +47,26 @@ def main_impl(args):
     keywords = args.keywords.split(",")
     logger.info(keywords)
     logger.info(args.gecko_path)
+
+    db = Database(args.db)
+    logger.info(db.execute(f"SELECT COUNT(*) FROM {args.schema}.{args.table}"))
+
     df_goog = google_trends(keywords, args.gecko_path)
     logger.info(f"Google trends dataframe shape: {df_goog.shape}")
 
     make_symlink(df_goog, args.path, f"google_trends_{args.table}", args.sep)
 
     if not args.just_file:
-        db = Database(args.db)
         db.copy(df_goog, args.schema.lower(), args.table.lower())
         logger.info(f"Appended df into {args.table}")
         alerter.info(f"Appended df into {args.table}")
 
+    logger.info(db.execute(f"SELECT COUNT(*) FROM {args.schema}.{args.table}"))
+
 
 @log_on_failure
 def main():
-    gecko_path = f"{os.path.dirname(os.path.abspath(__file__))}/extras/geckodriver_21"
+    gecko_path = f"{os.path.dirname(os.path.abspath(__file__))}/extras/geckodriver_23"
 
     parser = ArgumentParser(description="New controller script to manage google trends stuff")
     parser.add_argument("--keywords", help="words to scrape from google trends",
@@ -82,4 +87,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main() 
+    main()
