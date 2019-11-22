@@ -7,7 +7,7 @@ import pandas as pd
 import glob
 import getpass
 from alerting import get_alerter
-from CommWithDatabase import HandleDB
+from database import Database
 from common import log_on_failure
 
 __app__ = f"google_trends_{getpass.getuser()}"
@@ -53,11 +53,8 @@ def main_impl(args):
     make_symlink(df_goog, args.path, f"google_trends_{args.table}", args.sep)
 
     if not args.just_file:
-        db = HandleDB(args.db)
-        if args.db == 'mysql':
-            db.append_to_database(df_goog, args.table)
-        else:
-            db.append_to_database(df_goog, args.table.lower(), args.schema.lower())
+        db = Database(args.db)
+        db.copy(df_goog, args.schema.lower(), args.table.lower())
         logger.info(f"Appended df into {args.table}")
         alerter.info(f"Appended df into {args.table}")
 
@@ -76,7 +73,7 @@ def main():
     parser.add_argument("--gecko-path", help="geckodriver path to use default is _23",
                         default=gecko_path)
     parser.add_argument("--just-file", help="generate just the file", action="store_true")
-    parser.add_argument("--db", help='type fo the db to use mysql or postgres', choices=['mysql', 'postgres'])
+    parser.add_argument("--db", help='account to use for the database')
     args = parser.parse_args()
 
     main_impl(args)
@@ -85,4 +82,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    main() 
