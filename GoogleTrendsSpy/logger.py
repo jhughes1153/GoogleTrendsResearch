@@ -36,6 +36,8 @@ def get_logger(logger_, application: str):
     logger.info(f"{sys.version}")
     logger.info("Passed args:")
     logger.info(f"{sys.argv}")
+    logger.info("Current working directory")
+    logger.info(f"{os.getcwd()}")
 
     return logger
 

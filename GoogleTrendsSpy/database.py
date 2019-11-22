@@ -15,7 +15,7 @@ class DbInfo:
 
 
 class Database:
-    def __init__(self, account, config_file=f'{os.getcwd()}/config/Database.cfg'):
+    def __init__(self, account, config_file=f'{os.path.dirname(os.path.realpath(__file__))}/config/Database.cfg'):
         config = configparser.ConfigParser()
         config.read(config_file)
         acc = account.lower()
@@ -64,4 +64,4 @@ def get_default():
 if __name__ == '__main__':
     a = Database('bitcoin_writer')
     b = pd.read_csv('/home/jackh/google_trends_BITCOINKEYWORDS_2019_11_21.csv.0', index_col=0, sep='|')
-    a.copy(b, "bitcoin", "bitcoinkeywords")
+    # a.copy(b, "bitcoin", "bitcoinkeywords")
