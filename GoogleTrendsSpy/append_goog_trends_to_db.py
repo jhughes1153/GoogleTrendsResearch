@@ -54,10 +54,7 @@ def main_impl(args):
 
     if not args.just_file:
         db = Database(args.db)
-        if args.db == 'mysql':
-            db.copy(df_goog, args.schema.lower(), args.table.lower())
-        else:
-            db.copy(df_goog, args.schema.lower(), args.table.lower())
+        db.copy(df_goog, args.schema.lower(), args.table.lower())
         logger.info(f"Appended df into {args.table}")
         alerter.info(f"Appended df into {args.table}")
 
@@ -76,7 +73,7 @@ def main():
     parser.add_argument("--gecko-path", help="geckodriver path to use default is _23",
                         default=gecko_path)
     parser.add_argument("--just-file", help="generate just the file", action="store_true")
-    parser.add_argument("--db", help='type fo the db to use mysql or postgres', choices=['mysql', 'postgres'])
+    parser.add_argument("--db", help='account to use for the database')
     args = parser.parse_args()
 
     main_impl(args)
@@ -85,4 +82,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    main() 

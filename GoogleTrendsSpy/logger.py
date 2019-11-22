@@ -10,7 +10,7 @@ def get_logger(logger_, application: str):
 
     fh = logging.FileHandler(f'/home/{getpass.getuser()}/log/{application}_'
                              f'{dt.datetime.now().strftime("%Y-%m-%d_%H%m")}.log')
-    sh = logging.StreamHandler()
+    sh = logging.StreamHandler(sys.stdout)
     formatter = logging.Formatter('(%(asctime)s) (%(funcName)-8s) [%(levelname)-5s] [%(processName)-8s]: %(message)s')
     fh.setFormatter(formatter)
     sh.setFormatter(formatter)
@@ -21,9 +21,9 @@ def get_logger(logger_, application: str):
     logger.addHandler(sh)
     logger.addHandler(fh)
 
-    logger.info(f'%{"%" * (len(application)+2)}%')
-    logger.info(f'% {application} %')
-    logger.info(f'%{"%" * (len(application)+2)}%')
+    logger.info(f'*{"*" * (len(application)+2)}*')
+    logger.info(f'* {application} *')
+    logger.info(f'*{"*" * (len(application)+2)}*')
     logger.info("Started at:")
     logger.info(f'{dt.datetime.now()}')
     logger.info("Executable path:")

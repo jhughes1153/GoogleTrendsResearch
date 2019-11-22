@@ -4,6 +4,7 @@ import configparser
 import logging
 import os
 import pandas as pd
+import io
 
 
 class DbInfo:
@@ -42,14 +43,15 @@ class Database:
         with psycopg2.connect(host=self.db_config['HOST'],
                               user=self.db_config['USER'],
                               password=self.db_config['PASSWORD'],
-                              dbname=self.db_config['DATABASE'],
-                              cursor_factory=psycopg2.extras.RealDictCursor) as connection:
+                              dbname=self.db_config['DATABASE']) as connection:
             with connection.cursor() as cursor:
-                cursor.copy_from(df.to_csv(header=False, index=False), f'{schema}.{table}', sep=',')
+                s_buf = io.StringIO()
+                df.to_csv(s_buf, header=False, index=False)
+                s_buf.seek(0)
+                cursor.copy_from(s_buf, f'{schema}.{table}', sep=',')
 
         if connection:
             connection.close()
-
 
     def get_df(self, sql: str) -> pd.DataFrame:
         return pd.DataFrame(self.execute(sql))
@@ -57,3 +59,9 @@ class Database:
 
 def get_default():
     return Database('DATABASE_READER')
+
+
+if __name__ == '__main__':
+    a = Database('bitcoin_writer')
+    b = pd.read_csv('/home/jackh/google_trends_BITCOINKEYWORDS_2019_11_21.csv.0', index_col=0, sep='|')
+    a.copy(b, "bitcoin", "bitcoinkeywords")
